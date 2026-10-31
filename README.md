@@ -1,185 +1,253 @@
-# G Arasu Bakery
 
-Responsive customer storefront and mobile-ready REST API in one JavaScript (no TypeScript) Next.js App Router codebase, backed by MongoDB and Mongoose.
+# 🍰 G Arasu Bakery – Full-Stack E-Commerce Platform
 
-## Setup
+A modern, responsive and scalable bakery e-commerce platform developed for **G Arasu Bakery**, located in Muttaicadu, Kumarapuram, near Nagercoil, Tamil Nadu.
 
-1. Install Node.js 20.9 or newer.
-2. Set `MONGODB_URI` in `.env.local` to your MongoDB Atlas URI and choose a database name in its path.
-3. Set a random `AUTH_SECRET` of at least 32 characters.
-4. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` (minimum 12 characters).
-5. Run `npm install`, `npm run seed:admin`, then `npm run dev`.
+The application provides a complete online shopping experience where customers can explore traditional sweets, snacks and bakery products, add items to their shopping bag, place orders and track their purchases.
 
-The local `.env.local` file is ignored by Git. Never commit database credentials. Rotate credentials if they have been pasted into a chat, source file, or other shared location. This workspace's Node DNS resolver could not resolve the Atlas SRV record, so its local URI uses the equivalent replica-set hosts; the application accepts either `mongodb+srv://` or a standard `mongodb://` replica-set URI.
+It also includes a dedicated admin dashboard that allows bakery administrators to manage products, categories, inventory, customers and customer orders.
 
-MongoDB transactions are used for stock reservations and cancellations. Use Atlas or a replica-set-enabled MongoDB deployment.
+Built using **Next.js, JavaScript, Tailwind CSS, MongoDB Atlas and Mongoose**, the application follows a modular full-stack architecture with reusable REST APIs that can also support future Android and iOS applications.
 
-Next.js development output is isolated in `next-dev/`; production builds use `.next/`. If `next dev` is already running when you update the config, stop it in its terminal and run `npm run dev` again so it picks up the isolated output directory.
+---
 
-## Web storefront
+## 📖 Table of Contents
 
-Visit `/` for the responsive bakery website. It reads the live menu and categories from the same API routes used by mobile clients. Additional storefront pages include `/menu`, `/menu/:categorySlug`, `/sweets`, `/snacks`, `/products/:slug`, `/cart`, `/account`, `/about`, and `/contact`. Customers can search and filter the catalog, keep a local shopping bag, register or sign in, place COD orders for delivery or pickup, and view their order history.
+- [Project Overview](#-project-overview)
+- [Business Information](#-business-information)
+- [Project Objectives](#-project-objectives)
+- [Key Features](#-key-features)
+- [Customer Website](#-customer-website)
+- [Admin Dashboard](#-admin-dashboard)
+- [Product Management](#-product-management)
+- [Shopping Cart and Checkout](#-shopping-cart-and-checkout)
+- [Order Management](#-order-management-and-tracking)
+- [Authentication and Authorization](#-authentication-and-authorization)
+- [Technology Stack](#-technology-stack)
+- [Application Architecture](#-application-architecture)
+- [Database Architecture](#-database-architecture)
+- [API Architecture](#-api-architecture)
+- [Mobile Application Integration](#-mobile-application-integration)
+- [UI/UX Design](#-uiux-design)
+- [Security and Data Integrity](#-security-and-data-integrity)
+- [Performance and SEO](#-performance-and-seo)
+- [Installation and Setup](#-installation-and-setup)
+- [Environment Configuration](#-environment-configuration)
+- [Database Seeding](#-database-seeding)
+- [Testing](#-testing-and-validation)
+- [Deployment](#-deployment)
+- [Future Enhancements](#-future-enhancements)
+- [Project Roadmap](#-project-roadmap)
+- [Development Guidelines](#-development-guidelines)
+- [Project Limitations](#-project-limitations)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-Admins use `/admin/login` for the separate staff sign-in and `/admin` for the protected dashboard. The dashboard supports order review/status updates and product create/edit/soft-delete. Customer sign-out is on `/account`; admin sign-out is inside the dashboard. Admin tokens are stored separately from customer tokens in session storage.
+---
 
-The website's mobile layout is responsive; native apps can call the same `/api/*` endpoints on the deployed host. Browser checkout stores its short-lived bearer token in session storage. Native applications should use OS-provided secure token storage.
+## 🏪 Project Overview
 
-## Sample Nagercoil sweets and snacks
+G Arasu Bakery is a full-stack bakery shopping platform designed to bring a traditional local bakery business into the digital marketplace.
 
-Run `npm run seed:demo-products` to add sample listings such as banana chips, tapioca chips, mixture, kai murukku, thattai, ribbon pakoda, adhirasam, Mysore pak, coconut burfi, ellu urundai, nei appam, and milk peda. The seed can be rerun safely.
+The platform provides two major application interfaces:
 
-These are clearly marked `isDemo: true`, include illustrative prices and inventory only, display “Ask for today's price” in the storefront, and cannot be purchased. Each sample has an original local illustration under `public/images/products/`. Confirm actual products, prices, and stock with the bakery before publishing them. An admin must update a demo product with verified `pricePaise` and `stock` and explicitly set `isDemo: false` in the same `PATCH /api/admin/products/:id` request before it becomes orderable.
+### 1. Customer Storefront
 
-## Mobile authentication
+Customers can:
 
-Register or log in, then send the returned access token with protected requests:
+- Explore available bakery products.
+- Browse sweets and snacks by category.
+- Search for specific products.
+- View product details and pricing.
+- Add products to their shopping bag.
+- Register and log in to their accounts.
+- Place orders online.
+- Select delivery or store pickup.
+- View previous orders.
+- Track order status.
 
-```http
-Authorization: Bearer <accessToken>
-```
+### 2. Admin Management System
 
-Store tokens in the mobile operating system's secure storage. Tokens expire after seven days. The stateless token is not server-revocable; mobile logout should remove it from secure storage.
+Administrators can:
 
-## Routes
+- Access a protected admin dashboard.
+- Manage bakery products.
+- Create and organize categories.
+- Update product prices and stock.
+- Review customer orders.
+- Update order statuses.
+- Manage product availability.
+- Monitor bakery operations.
 
-| Method | Path | Purpose |
-|---|---|---|
-| GET | `/api/health` | Verify connection and API health |
-| POST | `/api/auth/register` | Register a customer |
-| POST | `/api/auth/login` | Login and receive bearer JWT |
-| GET | `/api/auth/me` | Current authenticated account |
-| GET | `/api/categories` | List active categories |
-| GET | `/api/products` | Product listing; supports `search`, `category`, `featured`, `sort`, `page`, `limit` |
-| GET | `/api/products/:slug` | Product details |
-| POST / GET | `/api/orders` | Place COD order / list own orders |
-| GET | `/api/orders/:id` | Read own order and status history |
-| GET / POST | `/api/admin/products` | Admin list/create products |
-| PATCH / DELETE | `/api/admin/products/:id` | Admin update or soft-delete product |
-| POST | `/api/admin/categories` | Admin create category |
-| GET | `/api/admin/orders` | Admin list/filter orders |
-| PATCH | `/api/admin/orders/:id` | Admin update order status/cancel |
+The application uses a centralized MongoDB database and a shared REST API architecture to maintain consistent information across the customer website, admin dashboard and future mobile applications.
 
-Prices are integer paise (₹40 is `4000`). The order API accepts product IDs and quantities only, then calculates totals from the database. It reserves inventory in a transaction and returns stock on eligible cancellation. Delivery fees are currently zero; configure a verified business setting before charging any.
+---
 
-## Example order body
+## 📍 Business Information
 
-```json
-{
-  "items": [{ "productId": "MongoDB_PRODUCT_ID", "quantity": 2 }],
-  "fulfillment": "delivery",
-  "address": {
-    "name": "Customer Name",
-    "phone": "9876543210",
-    "line1": "House and street",
-    "city": "Nagercoil",
-    "state": "Tamil Nadu",
-    "pincode": "629001"
-  },
-  "notes": ""
-}
-```
+| Information | Details |
+|---|---|
+| Business Name | G Arasu Bakery |
+| Business Category | Bakery, Sweets and Snacks |
+| Address | 78PC+97P, Muttaicadu, Kumarapuram, Tamil Nadu 629164 |
+| Contact Number | +91 63695 01625 |
+| Opening Hours | Monday – Sunday |
+| Operating Time | 8:00 AM – 10:00 PM |
+| Primary Service | Bakery Products and Takeout |
+| Target Market | Nagercoil and Nearby Locations |
 
-## Production limitations
+---
 
-This MVP does not yet include Razorpay, password reset, email, image uploads, coupons, or persistent rate limiting. Its in-memory authentication rate limiter is process-local and is not sufficient for a distributed/serverless deployment. Add a shared rate limit store and token revocation/refresh design before production.
+## 🎯 Project Objectives
 
+The primary objective is to develop a digital ordering platform that simplifies bakery operations and improves customer convenience.
+
+### Business Objectives
+
+- Establish an online presence for G Arasu Bakery.
+- Make bakery products accessible through a website.
+- Simplify product and inventory management.
+- Reduce manual order management.
+- Improve customer ordering convenience.
+- Provide transparent order status updates.
+- Support future business expansion.
+- Create a foundation for mobile commerce.
+
+### Technical Objectives
+
+- Build a full-stack application using Next.js.
+- Implement RESTful APIs for backend operations.
+- Integrate MongoDB Atlas for cloud database management.
+- Implement secure customer and admin authentication.
+- Develop reusable and maintainable React components.
+- Provide responsive user interfaces.
+- Design APIs that support web and mobile clients.
+- Maintain consistency during inventory and order operations.
+
+---
 
 ## ✨ Key Features
 
-### 🛍️ Customer Experience
+### 🛍️ Customer Features
 
-- **Modern Bakery Storefront:** Responsive shopping experience for desktop, tablet and mobile.
-- **Product Discovery:** Browse sweets, snacks and bakery products by category.
-- **Smart Search:** Find products using product names and categories.
-- **Product Details:** View descriptions, availability and pricing.
-- **Shopping Bag:** Add products, update quantities and remove items.
-- **Customer Authentication:** Secure registration and login.
-- **Online Ordering:** Place Cash on Delivery orders.
-- **Flexible Fulfillment:** Choose home delivery or store pickup.
-- **Order History:** View previously placed orders.
-- **Order Tracking:** Follow order progress and status updates.
-- **Mobile API Support:** Reuse the same backend APIs for future Android and iOS applications.
-
-### ⚙️ Admin Management
-
-- **Admin Authentication:** Separate and protected staff login.
-- **Dashboard:** Manage bakery operations from one place.
-- **Product Management:** Create, update and manage products.
-- **Category Management:** Organize sweets, snacks and bakery items.
-- **Order Management:** View and manage customer orders.
-- **Order Status Updates:** Manage order processing and fulfillment.
-- **Inventory Management:** Monitor product stock and availability.
-- **Demo Product Management:** Safely manage sample listings before publishing verified products.
-
----
-
-## 🏗️ Application Architecture
-
-The application follows a modular full-stack architecture using Next.js App Router.
-
-```text
-                  G ARASU BAKERY
-                         |
-          +--------------+--------------+
-          |                             |
-     Customer Storefront           Admin Panel
-          |                             |
-          +--------------+--------------+
-                         |
-                 Next.js App Router
-                         |
-                  REST API Layer
-                         |
-                  Authentication
-                         |
-                   Mongoose ODM
-                         |
-                   MongoDB Atlas
-```
-
-### Architecture Highlights
-
-- Single Next.js application for frontend and backend.
-- RESTful API endpoints for customer and admin operations.
-- Reusable React components.
-- Centralized MongoDB connection.
-- Mongoose schemas for structured data management.
-- Role-based access control.
-- Server-side price calculation.
-- Transaction-based inventory reservation.
-- Shared APIs for web and mobile clients.
-
----
-
-## 📂 Main Application Modules
-
-| Module | Description |
+| Feature | Description |
 |---|---|
-| Storefront | Customer-facing bakery website |
-| Product Catalog | Product listing and discovery |
-| Categories | Sweets, snacks and bakery categories |
-| Authentication | Customer and admin authentication |
-| Shopping Bag | Cart and quantity management |
-| Checkout | Delivery and pickup ordering |
-| Order Management | Order creation and processing |
-| Order Tracking | Order status and history |
-| Admin Dashboard | Bakery administration |
-| REST API | Backend services for web and mobile |
+| Responsive Homepage | Modern bakery landing page |
+| Product Catalog | Browse all available products |
+| Category Filtering | Filter sweets, snacks and bakery items |
+| Product Search | Search products by name |
+| Product Details | View descriptions and pricing |
+| Shopping Bag | Add, remove and update products |
+| Customer Registration | Create a customer account |
+| Customer Login | Secure account authentication |
+| Checkout | Submit bakery orders |
+| Delivery Selection | Home delivery or store pickup |
+| Order History | View previous purchases |
+| Order Tracking | Follow order progress |
+| Account Management | Access customer information |
+| Contact Page | Find bakery contact information |
+
+### ⚙️ Admin Features
+
+| Feature | Description |
+|---|---|
+| Admin Login | Protected administrator authentication |
+| Dashboard | Centralized bakery management |
+| Product CRUD | Create, read, update and manage products |
+| Category Management | Organize product categories |
+| Order Management | Review customer orders |
+| Order Status Updates | Manage order processing |
+| Inventory Management | Monitor stock and availability |
+| Customer Orders | View order information |
+| Demo Product Handling | Manage sample product listings |
 
 ---
 
-## 🍬 Product Categories
+## 🖥️ Customer Website
 
-The application includes sample categories inspired by popular Tamil Nadu bakery and traditional snack items.
+The customer-facing website is designed to provide an attractive and easy-to-use bakery shopping experience.
+
+### Homepage
+
+The homepage introduces the bakery and highlights popular products and available offers.
+
+Main sections:
+
+- Announcement and promotional bar.
+- Bakery branding and navigation.
+- Hero banner with bakery photography.
+- Featured product categories.
+- Popular sweets and snacks.
+- Best-selling bakery products.
+- Special offers and promotions.
+- Why Choose Us section.
+- Customer testimonials.
+- Store location and business hours.
+- Contact information.
+- Responsive footer.
+
+### Product Listing
+
+Customers can browse products through a structured product catalog.
+
+Features:
+
+- Category-based filtering.
+- Product search.
+- Featured product listings.
+- Price sorting.
+- Product availability indicators.
+- Discount labels.
+- Responsive product grid.
+- Pagination or load more functionality.
+
+### Product Details
+
+Each product page provides relevant information to help customers make purchasing decisions.
+
+Product information includes:
+
+- Product name.
+- Product description.
+- Product images.
+- Category.
+- Price.
+- Discount price.
+- Stock availability.
+- Quantity selection.
+- Add to Cart functionality.
+- Related products.
+
+### Customer Account
+
+Registered customers can access their personal accounts.
+
+Account functionality includes:
+
+- Customer profile.
+- Login and logout.
+- Registration.
+- Order history.
+- Individual order details.
+- Order tracking.
+
+---
+
+## 🍬 Product Management
+
+The platform supports different types of traditional Indian sweets, snacks and bakery products.
 
 ### Traditional Sweets
 
 - Adhirasam
 - Mysore Pak
 - Coconut Burfi
+- Milk Peda
 - Ellu Urundai
 - Nei Appam
-- Milk Peda
+- Laddu
+- Jangiri
+- Gulab Jamun
 
 ### Traditional Snacks
 
@@ -189,6 +257,9 @@ The application includes sample categories inspired by popular Tamil Nadu bakery
 - Kai Murukku
 - Thattai
 - Ribbon Pakoda
+- Masala Peanuts
+- Kara Sev
+- Thatta Payaru Snacks
 
 ### Bakery Products
 
@@ -200,144 +271,792 @@ The application includes sample categories inspired by popular Tamil Nadu bakery
 - Pastries
 - Cupcakes
 - Cookies
+- Cream Buns
+- Sandwiches
 
-> **Note:** Sample products are illustrative demo listings. Actual product availability, pricing and inventory must be confirmed by the bakery.
+> Product listings and prices are sample data until verified by the bakery. Demo products are not available for purchase until an administrator updates their information and explicitly activates them.
 
 ---
 
-## 🔐 Security and Data Integrity
+## 🛒 Shopping Cart and Checkout
 
-Security and data consistency are important parts of the application.
+The shopping cart provides a convenient way for customers to manage their selected products.
 
-- Password hashing for customer and admin accounts.
-- JWT-based authentication.
-- Separate customer and admin authentication tokens.
-- Protected admin API endpoints.
-- Authorization checks for customer-owned orders.
-- Server-side product price verification.
-- MongoDB transactions for inventory reservation.
-- Inventory restoration during eligible order cancellations.
-- Environment-based configuration for sensitive credentials.
-- Soft deletion for product management.
-- Input validation and API error handling.
+### Shopping Cart Functionality
+
+- Add products to the cart.
+- Increase or decrease quantities.
+- Remove individual products.
+- View selected product details.
+- Calculate subtotal.
+- Display the order summary.
+- Calculate applicable delivery fees.
+- Calculate the final amount.
+
+### Checkout Workflow
+
+1. Customer reviews the shopping bag.
+2. Customer proceeds to checkout.
+3. Customer enters contact information.
+4. Customer selects delivery or pickup.
+5. Customer enters the delivery address when required.
+6. Customer reviews the order summary.
+7. Customer places the order.
+8. Application validates product availability and prices.
+9. Inventory is reserved through a database transaction.
+10. Customer receives the generated order ID.
+
+### Supported Fulfillment Methods
+
+- Home Delivery.
+- Store Pickup.
+
+### Current Payment Support
+
+- Cash on Delivery (COD).
+
+Online payment integration is planned for a future release.
+
+---
+
+## 📦 Order Management and Tracking
+
+Order management is an important part of the bakery application.
+
+Every order contains customer details, purchased products, quantities, pricing information, fulfillment method and order status history.
+
+### Order Processing Workflow
+
+```text
+          Customer Places Order
+                   |
+                   v
+              Order Pending
+                   |
+                   v
+             Order Confirmed
+                   |
+                   v
+              Preparing
+                   |
+                   v
+        +----------+----------+
+        |                     |
+        v                     v
+   Ready for Pickup      Out for Delivery
+        |                     |
+        v                     v
+   Order Collected       Order Delivered
+        |                     |
+        +----------+----------+
+                   |
+                   v
+             Order Completed
+```
+
+### Order Statuses
+
+| Status | Description |
+|---|---|
+| Pending | Order has been submitted |
+| Confirmed | Admin has accepted the order |
+| Preparing | Bakery is preparing the products |
+| Ready for Pickup | Order is ready for collection |
+| Out for Delivery | Order has been dispatched |
+| Delivered | Customer has received the order |
+| Cancelled | Order has been cancelled |
+
+### Customer Order Tracking
+
+Customers can:
+
+- View their order ID.
+- Check the current order status.
+- View purchased products.
+- View order totals.
+- Review order history.
+- Follow order status updates.
+
+### Admin Order Processing
+
+Administrators can:
+
+- View all customer orders.
+- Search orders by ID.
+- Filter orders by status.
+- Review customer information.
+- View purchased products.
+- Update order statuses.
+- Cancel eligible orders.
+- Review order history.
+
+---
+
+## 🔐 Authentication and Authorization
+
+The application provides separate authentication workflows for customers and administrators.
+
+### Customer Authentication
+
+- Customer registration.
+- Customer login.
+- Password hashing.
+- JWT access tokens.
+- Protected customer APIs.
+- Account information.
+- Customer order authorization.
+
+### Admin Authentication
+
+- Separate admin login.
+- Environment-configured initial administrator.
+- Protected admin dashboard.
+- Admin-only API authorization.
+- Separate admin token storage.
+- Protected product and order management.
+
+### Authorization Strategy
+
+The backend validates authentication and authorization before allowing protected operations.
+
+Customers can only access their own account and order information.
+
+Administrators can access authorized management operations.
+
+---
+
+## 🧰 Technology Stack
+
+The application uses modern JavaScript technologies.
+
+| Technology | Purpose |
+|---|---|
+| Next.js | Full-stack React framework |
+| React.js | Component-based UI development |
+| JavaScript | Application development |
+| Tailwind CSS | Responsive styling |
+| MongoDB Atlas | Cloud database |
+| Mongoose | Database modeling |
+| JWT | Token-based authentication |
+| bcryptjs | Password hashing |
+| Redux Toolkit | State management |
+| Framer Motion | UI animations |
+| Lucide React | Icons |
+| React Hook Form | Form handling |
+| Zod | Input validation |
+| Recharts | Dashboard analytics (planned) |
+| Vercel | Cloud deployment |
+
+---
+
+## 🏗️ Application Architecture
+
+The application follows a modular architecture using Next.js App Router.
+
+```text
+                   G ARASU BAKERY
+                          |
+           +--------------+--------------+
+           |                             |
+     Customer Website              Admin Dashboard
+           |                             |
+           +--------------+--------------+
+                          |
+                   Next.js App Router
+                          |
+                   REST API Routes
+                          |
+              Authentication Middleware
+                          |
+                   Business Logic
+                          |
+                    Mongoose ODM
+                          |
+                    MongoDB Atlas
+```
+
+### Architectural Principles
+
+- Single codebase for frontend and backend.
+- Modular application structure.
+- Reusable React components.
+- Centralized database connectivity.
+- REST API-based communication.
+- Role-based access control.
+- Server-side business logic.
+- Database transaction support.
+- Separation of customer and admin operations.
+
+---
+
+## 🗄️ Database Architecture
+
+MongoDB Atlas is used as the primary cloud database.
+
+Mongoose provides schema definitions, validation and database interaction.
+
+### Main Collections
+
+| Collection | Responsibility |
+|---|---|
+| Users | Customer and administrator accounts |
+| Products | Bakery products and pricing |
+| Categories | Product categorization |
+| Orders | Customer order records |
+| Addresses | Customer delivery addresses |
+| Payments | Payment information for future integrations |
+| Coupons | Future discount management |
+| Inventory Transactions | Stock movement records |
+
+### Product Data Structure
+
+```javascript
+{
+  name: "Banana Chips",
+  slug: "banana-chips",
+  description: "Traditional crispy banana chips",
+  category: "Traditional Snacks",
+  pricePaise: null,
+  stock: null,
+  images: [],
+  isFeatured: false,
+  isAvailable: false,
+  isDemo: true,
+  createdAt: new Date()
+}
+```
+
+### Database Design Principles
+
+- Schema-based data validation.
+- Consistent document structures.
+- Unique product slugs.
+- Appropriate database indexes.
+- Timestamp management.
+- Inventory consistency.
+- Transaction-based stock operations.
+- Server-side price calculation.
+
+---
+
+## 🔌 API Architecture
+
+The application provides RESTful APIs for customer and administrator operations.
+
+### Public APIs
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/health` | API and database health |
+| GET | `/api/products` | List products |
+| GET | `/api/products/:slug` | Product details |
+| GET | `/api/categories` | List categories |
+
+### Authentication APIs
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | `/api/auth/register` | Customer registration |
+| POST | `/api/auth/login` | Customer login |
+| GET | `/api/auth/me` | Current user details |
+
+### Order APIs
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | `/api/orders` | Create an order |
+| GET | `/api/orders` | List customer orders |
+| GET | `/api/orders/:id` | View order details |
+
+### Admin APIs
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/admin/products` | List admin products |
+| POST | `/api/admin/products` | Create product |
+| PATCH | `/api/admin/products/:id` | Update product |
+| DELETE | `/api/admin/products/:id` | Soft-delete product |
+| POST | `/api/admin/categories` | Create category |
+| GET | `/api/admin/orders` | List all orders |
+| PATCH | `/api/admin/orders/:id` | Update order |
+
+### API Design Principles
+
+- Consistent request and response formats.
+- Proper HTTP status codes.
+- Input validation.
+- Server-side authorization.
+- Centralized error handling.
+- Database-backed product information.
+- Secure order processing.
 
 ---
 
 ## 📱 Mobile Application Integration
 
-The backend is designed to support future mobile applications without creating a separate backend.
+The application backend is designed to support mobile application development.
 
-Android and iOS applications can consume the same REST API endpoints.
+Future Android and iOS applications can consume the same REST API endpoints without requiring a separate backend.
 
-### Mobile Integration Features
+### Supported Mobile Operations
 
-- Customer registration and login.
-- Product catalog browsing.
+- Customer registration.
+- Customer login.
+- Product browsing.
 - Category filtering.
-- Shopping cart.
+- Product details.
 - Order placement.
 - Order history.
-- Order status tracking.
+- Order tracking.
 
-Authentication uses bearer access tokens. Mobile applications should store these tokens using Android Keystore or iOS Keychain through a secure-storage library.
+### Mobile Authentication
 
----
+Protected endpoints accept JWT bearer access tokens.
 
-## 🚀 Future Enhancements
+```http
+Authorization: Bearer <accessToken>
+```
 
-The following features are planned for future development:
-
-- [ ] Razorpay online payment integration.
-- [ ] Email order confirmation notifications.
-- [ ] WhatsApp order notifications.
-- [ ] Product image upload using Cloudinary.
-- [ ] Coupon and discount management.
-- [ ] Delivery charge configuration.
-- [ ] Delivery area and pincode management.
-- [ ] Real-time order status notifications.
-- [ ] Customer reviews and ratings.
-- [ ] Wishlist functionality.
-- [ ] Advanced sales analytics.
-- [ ] Daily and monthly sales reports.
-- [ ] Password reset and email verification.
-- [ ] Persistent distributed API rate limiting.
-- [ ] Android and iOS mobile applications.
-- [ ] Product availability and pre-order scheduling.
+Mobile applications should store authentication tokens using operating-system secure storage.
 
 ---
 
-## 🧪 Testing and Verification
+## 🎨 UI/UX Design
 
-Before deployment, verify the following workflows:
+The application follows a premium bakery-inspired visual identity.
 
-1. Customer registration and login.
-2. Product listing and category filtering.
-3. Shopping bag operations.
-4. Checkout validation.
-5. Successful Cash on Delivery order creation.
-6. Inventory reservation.
-7. Customer order history.
-8. Order status tracking.
-9. Admin login and authorization.
-10. Product creation, editing and deletion.
-11. Admin order status updates.
-12. Inventory restoration after eligible cancellations.
-13. Mobile API authentication.
+### Design Theme
+
+- Chocolate brown.
+- Warm cream.
+- Caramel orange.
+- Soft beige.
+- Subtle olive green.
+
+### Typography
+
+- Playfair Display – Headings.
+- Poppins – Body text.
+- Inter – UI elements.
+
+### UI Components
+
+- Responsive navigation.
+- Hero banners.
+- Product cards.
+- Category cards.
+- Search interfaces.
+- Shopping cart.
+- Checkout forms.
+- Admin sidebar.
+- Data tables.
+- Dashboard statistics.
+- Order status timelines.
+- Loading skeletons.
+- Empty states.
+
+### Animation Strategy
+
+- Smooth page transitions.
+- Scroll-triggered animations.
+- Product image hover effects.
+- Animated buttons.
+- Add-to-cart feedback.
+- Responsive mobile navigation.
+- Order progress animations.
+- Lightweight loading effects.
+
+The interface should remain accessible, fast and responsive across different screen sizes.
+
+---
+
+## 🔒 Security and Data Integrity
+
+Security is implemented across authentication, authorization, APIs and database operations.
+
+### Security Measures
+
+- Password hashing using bcryptjs.
+- JWT-based authentication.
+- Separate customer and admin authentication.
+- Protected admin endpoints.
+- Server-side authorization.
+- Customer-specific order access.
+- Server-side product price calculation.
+- Input validation.
+- Environment-based secret management.
+- Soft deletion of products.
+- Database transaction support.
+
+### Inventory Consistency
+
+MongoDB transactions are used for stock reservations and eligible cancellations.
+
+This helps prevent inconsistent inventory updates during order processing.
+
+The deployment database must support replica sets or transactions.
+
+---
+
+## ⚡ Performance and SEO
+
+The application is designed with performance and search visibility in mind.
+
+### Performance
+
+- Next.js App Router.
+- Reusable React components.
+- Optimized images.
+- Responsive layouts.
+- Efficient database queries.
+- Server-side data operations.
+- Loading and empty states.
+- Lightweight animations.
+
+### SEO
+
+- Page-specific metadata.
+- SEO-friendly product URLs.
+- Semantic HTML.
+- Open Graph metadata.
+- Search engine indexing support.
+- Sitemap and robots.txt.
+- Local business structured data.
+
+---
+
+## 🚀 Installation and Setup
+
+### Prerequisites
+
+Install the following:
+
+- Node.js 20.9 or newer.
+- npm.
+- Git.
+- MongoDB Atlas account.
+- Visual Studio Code or another code editor.
+
+### Clone Repository
+
+```bash
+git clone <YOUR_GITHUB_REPOSITORY_URL>
+```
+
+### Navigate to Project
+
+```bash
+cd g-arasu-bakery
+```
+
+### Install Dependencies
+
+```bash
+npm install
+```
+
+### Configure Environment Variables
+
+Create `.env.local` in the project root.
+
+Configure the MongoDB connection, authentication secret and admin credentials.
+
+### Seed Admin Account
+
+```bash
+npm run seed:admin
+```
+
+### Seed Demo Products
+
+```bash
+npm run seed:demo-products
+```
+
+### Start Development Server
+
+```bash
+npm run dev
+```
+
+Open the application:
+
+```text
+http://localhost:3000
+```
+
+Admin login:
+
+```text
+http://localhost:3000/admin/login
+```
+
+---
+
+## 🧪 Testing and Validation
+
+Test the following application workflows before production deployment.
+
+### Customer Testing
+
+- [ ] Homepage loading.
+- [ ] Product listing.
+- [ ] Category filtering.
+- [ ] Product search.
+- [ ] Product details.
+- [ ] Customer registration.
+- [ ] Customer login.
+- [ ] Shopping bag operations.
+- [ ] Checkout validation.
+- [ ] Order creation.
+- [ ] Order history.
+- [ ] Order tracking.
+
+### Admin Testing
+
+- [ ] Admin authentication.
+- [ ] Protected dashboard access.
+- [ ] Product creation.
+- [ ] Product updates.
+- [ ] Product soft deletion.
+- [ ] Category creation.
+- [ ] Order listing.
+- [ ] Order status updates.
+- [ ] Inventory reservation.
+- [ ] Inventory restoration.
+
+### API Testing
+
+- [ ] Health check.
+- [ ] Authentication endpoints.
+- [ ] Product endpoints.
+- [ ] Category endpoints.
+- [ ] Order endpoints.
+- [ ] Admin endpoints.
+- [ ] Invalid request handling.
+- [ ] Unauthorized access handling.
 
 ---
 
 ## 🌐 Deployment
 
-The application can be deployed using Vercel with MongoDB Atlas as its cloud database.
+The recommended deployment architecture uses Vercel for the Next.js application and MongoDB Atlas for database hosting.
 
-### Deployment Workflow
+### Deployment Steps
 
-1. Push the project to GitHub.
-2. Create a MongoDB Atlas production database.
-3. Import the GitHub repository into Vercel.
-4. Configure production environment variables.
-5. Deploy the Next.js application.
-6. Verify API health and database connectivity.
-7. Test customer and admin workflows.
-8. Configure the production domain.
+1. Push the source code to GitHub.
+2. Create a production MongoDB Atlas database.
+3. Connect the GitHub repository to Vercel.
+4. Configure environment variables.
+5. Deploy the application.
+6. Verify database connectivity.
+7. Test customer authentication.
+8. Test admin authentication.
+9. Test order processing.
+10. Configure the production domain.
 
-### Health Check Endpoint
+### Production Checklist
 
-```http
-GET /api/health
+- [ ] Production MongoDB connection.
+- [ ] Strong authentication secrets.
+- [ ] Secure admin credentials.
+- [ ] Environment variables configured.
+- [ ] HTTPS enabled.
+- [ ] API authorization verified.
+- [ ] Database backups configured.
+- [ ] Rate limiting configured.
+- [ ] Error logging configured.
+- [ ] Mobile responsiveness verified.
+- [ ] SEO metadata verified.
+
+---
+
+## 🚀 Future Enhancements
+
+The following features can extend the platform beyond its current MVP functionality.
+
+### E-Commerce Enhancements
+
+- [ ] Razorpay payment integration.
+- [ ] UPI payment support through a payment provider.
+- [ ] Online payment verification.
+- [ ] Discount coupons.
+- [ ] Promotional offers.
+- [ ] Wishlist functionality.
+- [ ] Customer product reviews.
+- [ ] Product ratings.
+- [ ] Advanced product filtering.
+
+### Bakery Operations
+
+- [ ] Daily product availability management.
+- [ ] Pre-order scheduling.
+- [ ] Bulk order management.
+- [ ] Custom cake ordering.
+- [ ] Delivery area management.
+- [ ] Delivery fee configuration.
+- [ ] Low-stock notifications.
+- [ ] Sales analytics.
+- [ ] Daily sales reports.
+- [ ] Monthly revenue reports.
+
+### Customer Communication
+
+- [ ] Email order confirmation.
+- [ ] WhatsApp order notifications.
+- [ ] Order status notifications.
+- [ ] Password reset.
+- [ ] Email verification.
+- [ ] Promotional notifications.
+
+### Mobile Application
+
+- [ ] Android application.
+- [ ] iOS application.
+- [ ] Push notifications.
+- [ ] Mobile-specific shopping experience.
+- [ ] Secure mobile authentication.
+
+---
+
+## 📅 Project Roadmap
+
+| Phase | Development Activity | Status |
+|---|---|---|
+| Phase 1 | Project initialization | Completed |
+| Phase 2 | MongoDB integration | Implemented |
+| Phase 3 | Customer storefront | Implemented |
+| Phase 4 | Product and category APIs | Implemented |
+| Phase 5 | Customer authentication | Implemented |
+| Phase 6 | Shopping bag and checkout | Implemented |
+| Phase 7 | Order management | Implemented |
+| Phase 8 | Admin dashboard | Implemented |
+| Phase 9 | Mobile API support | Implemented |
+| Phase 10 | Online payment integration | Planned |
+| Phase 11 | Email and WhatsApp notifications | Planned |
+| Phase 12 | Production hardening | Pending |
+
+*Update these statuses according to the actual implementation and testing results.*
+
+---
+
+## 💡 Development Guidelines
+
+The project follows a clean and maintainable development approach.
+
+### Coding Standards
+
+- Use JavaScript instead of TypeScript.
+- Follow consistent naming conventions.
+- Build reusable React components.
+- Keep API routes organized.
+- Separate business logic from UI components.
+- Use Mongoose models for database operations.
+- Validate incoming API requests.
+- Handle errors consistently.
+- Avoid unnecessary code duplication.
+- Keep sensitive information in environment variables.
+
+### Git Workflow
+
+Recommended branch structure:
+
+```text
+main
+  |
+  +--- feature/customer-storefront
+  |
+  +--- feature/admin-dashboard
+  |
+  +--- feature/product-management
+  |
+  +--- feature/order-tracking
+  |
+  +--- fix/api-validation
 ```
 
-Use this endpoint to verify application and database connectivity.
+Use feature branches and pull requests for organized development.
 
 ---
 
-## 👨‍💻 Development Philosophy
+## ⚠️ Current Project Limitations
 
-This project focuses on building a practical, maintainable and scalable e-commerce solution using modern JavaScript technologies.
+The current implementation is an MVP and does not yet include every production integration.
 
-### Development Principles
+The following features are not currently available:
 
-- Component-based development.
-- Reusable application architecture.
-- API-first backend design.
-- Secure authentication and authorization.
-- Consistent database operations.
-- Mobile-friendly responsive design.
-- Maintainable code organization.
-- Scalable cloud deployment.
+- Razorpay online payments.
+- Password reset.
+- Email notifications.
+- Cloud image uploads.
+- Coupon management.
+- Persistent distributed rate limiting.
+- Token revocation.
+- Advanced delivery management.
+- Real-time WebSocket notifications.
+
+The authentication rate limiter is process-local and is not sufficient for a distributed serverless production environment.
+
+A shared rate-limit store and a suitable token revocation or refresh strategy should be implemented before production use.
 
 ---
 
-## 📌 Project Status
+## 🤝 Contributing
 
-**Current Stage:** MVP Development
+Contributions and suggestions are welcome.
 
-The core storefront, customer authentication, product management, ordering workflow and admin functionality are included in the current implementation.
+To contribute:
 
-Some production integrations, including online payments, notifications and distributed rate limiting, remain planned enhancements.
+1. Fork the repository.
+2. Create a feature branch.
+3. Implement your changes.
+4. Test your implementation.
+5. Commit your changes.
+6. Push your branch.
+7. Open a Pull Request.
+
+Example:
+
+```bash
+git checkout -b feature/new-feature
+
+git add .
+
+git commit -m "feat: add new feature"
+
+git push origin feature/new-feature
+```
+
+---
+
+## 👨‍💻 Author
+
+**Sherlin A G**
+
+Software Developer | Web & Mobile Application Development
+
+Interested in building practical web applications, mobile solutions and AI-powered products using modern JavaScript technologies.
+
+### Connect With Me
+
+- Portfolio: https://sherlin-ag.vercel.app/
+- GitHub: https://github.com/sherlinag
+- LinkedIn: Add your LinkedIn profile URL.
 
 ---
 
 ## 📄 License
 
-This project is developed for G Arasu Bakery. Add an appropriate license before distributing or reusing the source code publicly.
+This project is developed for G Arasu Bakery.
+
+Add an appropriate license before distributing or reusing the source code publicly.
+
+---
+
+<p align="center">
+  <strong>G Arasu Bakery</strong>
+  <br />
+  Freshly Baked Happiness, Every Day! 🍰
+  <br />
+  Built with ❤️ using Next.js, JavaScript and MongoDB.
+</p>

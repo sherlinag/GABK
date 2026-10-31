@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 520">
+  <defs><linearGradient id="bg" x2="0" y2="1"><stop stop-color="#f5e5d3"/><stop offset="1" stop-color="#dfc09e"/></linearGradient><linearGradient id="disc" x2="0" y2="1"><stop stop-color="#e8aa58"/><stop offset="1" stop-color="#a95c27"/></linearGradient></defs>
+  <rect width="640" height="520" rx="32" fill="url(#bg)"/><circle cx="320" cy="266" r="205" fill="#fff5e6" opacity=".8"/><ellipse cx="320" cy="343" rx="179" ry="70" fill="#c79b6a"/>
+  <g fill="url(#disc)" stroke="#985323" stroke-width="6"><ellipse cx="250" cy="265" rx="82" ry="27"/><ellipse cx="369" cy="256" rx="80" ry="26"/><ellipse cx="311" cy="326" rx="83" ry="27"/></g>
+  <g fill="#70421f"><circle cx="220" cy="261" r="4"/><circle cx="251" cy="253" r="4"/><circle cx="281" cy="267" r="4"/><circle cx="344" cy="251" r="4"/><circle cx="376" cy="259" r="4"/><circle cx="401" cy="248" r="4"/><circle cx="279" cy="321" r="4"/><circle cx="309" cy="329" r="4"/><circle cx="338" cy="317" r="4"/></g>
+</svg>

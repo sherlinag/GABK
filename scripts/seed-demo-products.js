@@ -9,6 +9,7 @@ const demoProducts = [
   {
     name: "Nagercoil-Style Banana Chips",
     slug: "sample-nagercoil-banana-chips",
+    image: "/images/products/banana-chips.svg",
     categorySlug: "savoury-snacks",
     pricePaise: 12000,
     stock: 20,
@@ -17,6 +18,7 @@ const demoProducts = [
   {
     name: "Tapioca Chips",
     slug: "sample-tapioca-chips",
+    image: "/images/products/tapioca-chips.svg",
     categorySlug: "savoury-snacks",
     pricePaise: 10000,
     stock: 20,
@@ -25,6 +27,7 @@ const demoProducts = [
   {
     name: "South Tamil Nadu Mixture",
     slug: "sample-south-tamil-nadu-mixture",
+    image: "/images/products/mixture.svg",
     categorySlug: "savoury-snacks",
     pricePaise: 9000,
     stock: 20,
@@ -33,6 +36,7 @@ const demoProducts = [
   {
     name: "Handmade Kai Murukku",
     slug: "sample-kai-murukku",
+    image: "/images/products/kai-murukku.svg",
     categorySlug: "savoury-snacks",
     pricePaise: 15000,
     stock: 20,
@@ -41,6 +45,7 @@ const demoProducts = [
   {
     name: "Crispy Thattai",
     slug: "sample-thattai",
+    image: "/images/products/thattai.svg",
     categorySlug: "savoury-snacks",
     pricePaise: 10000,
     stock: 20,
@@ -49,6 +54,7 @@ const demoProducts = [
   {
     name: "Ribbon Pakoda",
     slug: "sample-ribbon-pakoda",
+    image: "/images/products/ribbon-pakoda.svg",
     categorySlug: "savoury-snacks",
     pricePaise: 10000,
     stock: 20,
@@ -57,6 +63,7 @@ const demoProducts = [
   {
     name: "Traditional Adhirasam",
     slug: "sample-adhirasam",
+    image: "/images/products/adhirasam.svg",
     categorySlug: "traditional-sweets",
     pricePaise: 15000,
     stock: 20,
@@ -65,6 +72,7 @@ const demoProducts = [
   {
     name: "Mysore Pak",
     slug: "sample-mysore-pak",
+    image: "/images/products/mysore-pak.svg",
     categorySlug: "traditional-sweets",
     pricePaise: 22000,
     stock: 20,
@@ -73,6 +81,7 @@ const demoProducts = [
   {
     name: "Coconut Burfi",
     slug: "sample-coconut-burfi",
+    image: "/images/products/coconut-burfi.svg",
     categorySlug: "traditional-sweets",
     pricePaise: 18000,
     stock: 20,
@@ -81,6 +90,7 @@ const demoProducts = [
   {
     name: "Ellu Urundai",
     slug: "sample-ellu-urundai",
+    image: "/images/products/ellu-urundai.svg",
     categorySlug: "traditional-sweets",
     pricePaise: 12000,
     stock: 20,
@@ -89,6 +99,7 @@ const demoProducts = [
   {
     name: "Nei Appam",
     slug: "sample-nei-appam",
+    image: "/images/products/nei-appam.svg",
     categorySlug: "traditional-sweets",
     pricePaise: 15000,
     stock: 20,
@@ -97,6 +108,7 @@ const demoProducts = [
   {
     name: "Milk Peda",
     slug: "sample-milk-peda",
+    image: "/images/products/milk-peda.svg",
     categorySlug: "traditional-sweets",
     pricePaise: 20000,
     stock: 20,
@@ -116,7 +128,7 @@ try {
     throw new Error(`Required categories are missing: ${missingCategories.join(", ")}. Run npm run db:init first.`);
   }
 
-  for (const { categorySlug, ...product } of demoProducts) {
+  for (const { categorySlug, image, ...product } of demoProducts) {
     await Product.updateOne(
       { slug: product.slug },
       {
@@ -126,7 +138,7 @@ try {
           isDemo: true,
           isAvailable: true,
           isFeatured: false,
-          images: []
+          images: [image]
         }
       },
       { upsert: true, runValidators: true }

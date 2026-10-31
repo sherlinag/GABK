@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 520">
+  <defs><linearGradient id="bg" x2="0" y2="1"><stop stop-color="#f7e8d5"/><stop offset="1" stop-color="#e1c19b"/></linearGradient><radialGradient id="appam"><stop stop-color="#e5ad5c"/><stop offset=".8" stop-color="#9e5429"/><stop offset="1" stop-color="#65361e"/></radialGradient></defs>
+  <rect width="640" height="520" rx="32" fill="url(#bg)"/><circle cx="320" cy="270" r="205" fill="#fff6e6" opacity=".8"/><ellipse cx="320" cy="353" rx="178" ry="70" fill="#d0ad7d"/>
+  <g fill="url(#appam)" stroke="#7b421f" stroke-width="5"><ellipse cx="242" cy="264" rx="59" ry="47"/><ellipse cx="365" cy="250" rx="59" ry="47"/><ellipse cx="307" cy="332" rx="61" ry="48"/></g>
+  <g fill="#ffd982" opacity=".85"><circle cx="226" cy="246" r="5"/><circle cx="254" cy="261" r="4"/><circle cx="352" cy="235" r="5"/><circle cx="380" cy="256" r="4"/><circle cx="289" cy="317" r="5"/><circle cx="321" cy="333" r="4"/></g>
+</svg>

@@ -18,7 +18,7 @@ Next.js development output is isolated in `next-dev/`; production builds use `.n
 
 ## Web storefront
 
-Visit `/` for the responsive bakery website. It reads the live menu and categories from the same API routes used by mobile clients. Customers can search and filter the catalog, keep a local shopping bag, register or sign in, place COD orders for delivery or pickup, and view their order history. Product listings are empty until the admin adds products; no example pricing or inventory is presented as real store data.
+Visit `/` for the responsive bakery website. It reads the live menu and categories from the same API routes used by mobile clients. Additional storefront pages include `/menu`, `/menu/:categorySlug`, `/products/:slug`, `/cart`, `/account`, `/about`, and `/contact`. Customers can search and filter the catalog, keep a local shopping bag, register or sign in, place COD orders for delivery or pickup, and view their order history.
 
 The website's mobile layout is responsive; native apps can call the same `/api/*` endpoints on the deployed host. Browser checkout stores its short-lived bearer token in session storage. Native applications should use OS-provided secure token storage.
 
@@ -26,7 +26,7 @@ The website's mobile layout is responsive; native apps can call the same `/api/*
 
 Run `npm run seed:demo-products` to add sample listings such as banana chips, tapioca chips, mixture, kai murukku, thattai, ribbon pakoda, adhirasam, Mysore pak, coconut burfi, ellu urundai, nei appam, and milk peda. The seed can be rerun safely.
 
-These are clearly marked `isDemo: true`, include illustrative prices and inventory only, display “Ask for today's price” in the storefront, and cannot be purchased. Confirm actual products, prices, and stock with the bakery before publishing them. An admin must update a demo product with verified `pricePaise` and `stock` and explicitly set `isDemo: false` in the same `PATCH /api/admin/products/:id` request before it becomes orderable.
+These are clearly marked `isDemo: true`, include illustrative prices and inventory only, display “Ask for today's price” in the storefront, and cannot be purchased. Each sample has an original local illustration under `public/images/products/`. Confirm actual products, prices, and stock with the bakery before publishing them. An admin must update a demo product with verified `pricePaise` and `stock` and explicitly set `isDemo: false` in the same `PATCH /api/admin/products/:id` request before it becomes orderable.
 
 ## Mobile authentication
 

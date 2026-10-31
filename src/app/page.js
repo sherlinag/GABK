@@ -1,6 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import StoreHeader from "@/components/store-header";
+import StoreFooter from "@/components/store-footer";
+import { readCart, writeCart } from "@/lib/cart";
 
 const EMPTY_ADDRESS = {
   name: "",
@@ -105,8 +109,7 @@ export default function Home() {
 
   useEffect(() => {
     try {
-      const storedCart = JSON.parse(window.localStorage.getItem("g-arasu-cart") || "[]");
-      if (Array.isArray(storedCart)) setCart(storedCart);
+      setCart(readCart());
     } catch {
       window.localStorage.removeItem("g-arasu-cart");
     }
@@ -115,7 +118,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (cartReady) window.localStorage.setItem("g-arasu-cart", JSON.stringify(cart));
+    if (cartReady) writeCart(cart);
   }, [cart, cartReady]);
 
   const cartCount = useMemo(() => cart.reduce((total, item) => total + item.quantity, 0), [cart]);
@@ -228,39 +231,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="announcement">
-        BAKED FRESH, EVERY DAY <span aria-hidden="true">✦</span> <strong>Pickup &amp; local ordering in Nagercoil</strong>
-      </div>
-      <header className="site-header">
-        <div className="nav-wrap">
-          <a className="brand" href="#" aria-label="G Arasu Bakery home">
-            <span className="brand-mark">G</span>
-            <span>
-              <span className="brand-name">G Arasu Bakery</span>
-              <span className="brand-sub">Freshly baked with love</span>
-            </span>
-          </a>
-          <nav className={`nav-links${mobileMenuOpen ? " is-open" : ""}`} aria-label="Main navigation">
-            <a href="#menu" onClick={() => setMobileMenuOpen(false)}>Our menu</a>
-            <a href="#story" onClick={() => setMobileMenuOpen(false)}>Our story</a>
-            <a href="#visit" onClick={() => setMobileMenuOpen(false)}>Visit us</a>
-          </nav>
-          <div className="nav-actions">
-            <button className="icon-button mobile-menu-button" type="button" aria-label="Toggle menu" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              <Icon name="menu" />
-            </button>
-            {accessToken && (
-              <button className="icon-button" type="button" aria-label="Your orders" title="Your orders" onClick={() => { setCartOpen(true); loadOrders(); }}>
-                <span aria-hidden="true">☺</span>
-              </button>
-            )}
-            <button className="icon-button" type="button" aria-label={`Shopping bag, ${cartCount} items`} onClick={() => { setCartOpen(true); setShowOrders(false); }}>
-              <Icon name="bag" />
-              {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
-            </button>
-          </div>
-        </div>
-      </header>
+      <StoreHeader />
 
       <main>
         <section className="hero">
@@ -300,16 +271,15 @@ export default function Home() {
             </form>
           </div>
           <div className="category-row" aria-label="Filter by category">
-            <button className={`category-chip${activeCategory ? "" : " active"}`} type="button" onClick={() => setActiveCategory("")}>Everything</button>
+            <Link className={`category-chip${activeCategory ? "" : " active"}`} href="/menu">Everything</Link>
             {categories.map((category) => (
-              <button
+              <Link
                 key={category._id}
                 className={`category-chip${activeCategory === category._id ? " active" : ""}`}
-                type="button"
-                onClick={() => setActiveCategory(activeCategory === category._id ? "" : category._id)}
+                href={`/menu/${category.slug}`}
               >
                 {category.name}
-              </button>
+              </Link>
             ))}
           </div>
           {notice && !cartOpen && <p className="form-success" role="status">{notice}</p>}
@@ -329,19 +299,19 @@ export default function Home() {
               </div>
             ) : products.map((product) => (
               <article className="product-card" key={product._id}>
-                <div className="product-photo">
+                <Link className="product-photo" href={`/products/${product.slug}`} aria-label={`View ${product.name}`}>
                   {product.images?.[0]
-                    ? <img src={product.images[0]} alt={product.name} loading="lazy" />
+                    ? <img src={product.images[0]} alt={product.name} loading="lazy" onError={(event) => { event.currentTarget.style.display = "none"; }} />
                     : <span className="product-emoji" aria-hidden="true">{foodEmoji(product)}</span>}
                   {product.isDemo
                     ? <span className="product-label">Sample listing</span>
                     : product.discountPricePaise
                       ? <span className="product-label">Fresh favourite</span>
                       : !product.stock && <span className="product-label">Sold out</span>}
-                </div>
+                </Link>
                 <div className="product-info">
                   <div className="product-category">{product.category?.name || "Bakery"}</div>
-                  <h3>{product.name}</h3>
+                  <h3><Link href={`/products/${product.slug}`}>{product.name}</Link></h3>
                   <div className="product-desc">{product.description || "Freshly prepared with care at G Arasu Bakery."}</div>
                   <div className="product-bottom">
                     <span className="product-price">
@@ -381,19 +351,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="footer">
-        <div className="footer-inner">
-          <div>
-            <a className="brand" href="#">
-              <span className="brand-mark">G</span>
-              <span><span className="brand-name">G Arasu Bakery</span><span className="brand-sub">Freshly baked with love</span></span>
-            </a>
-            <p>Your neighbourhood bakery in Muttaicadu. Fresh treats and warm smiles, every day.</p>
-          </div>
-          <div className="footer-links"><a href="#menu">Our menu</a><a href="#story">Our story</a><a href="#visit">Find us</a><a href="tel:+916369501625">Call the bakery</a></div>
-        </div>
-        <div className="footer-bottom">© {new Date().getFullYear()} G Arasu Bakery · Baked fresh in Kumarapuram, Tamil Nadu</div>
-      </footer>
+      <StoreFooter />
 
       {cartOpen && (
         <div className="overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setCartOpen(false); }}>

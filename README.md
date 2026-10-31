@@ -18,7 +18,9 @@ Next.js development output is isolated in `next-dev/`; production builds use `.n
 
 ## Web storefront
 
-Visit `/` for the responsive bakery website. It reads the live menu and categories from the same API routes used by mobile clients. Additional storefront pages include `/menu`, `/menu/:categorySlug`, `/products/:slug`, `/cart`, `/account`, `/about`, and `/contact`. Customers can search and filter the catalog, keep a local shopping bag, register or sign in, place COD orders for delivery or pickup, and view their order history.
+Visit `/` for the responsive bakery website. It reads the live menu and categories from the same API routes used by mobile clients. Additional storefront pages include `/menu`, `/menu/:categorySlug`, `/sweets`, `/snacks`, `/products/:slug`, `/cart`, `/account`, `/about`, and `/contact`. Customers can search and filter the catalog, keep a local shopping bag, register or sign in, place COD orders for delivery or pickup, and view their order history.
+
+Admins use `/admin/login` for the separate staff sign-in and `/admin` for the protected dashboard. The dashboard supports order review/status updates and product create/edit/soft-delete. Customer sign-out is on `/account`; admin sign-out is inside the dashboard. Admin tokens are stored separately from customer tokens in session storage.
 
 The website's mobile layout is responsive; native apps can call the same `/api/*` endpoints on the deployed host. Browser checkout stores its short-lived bearer token in session storage. Native applications should use OS-provided secure token storage.
 

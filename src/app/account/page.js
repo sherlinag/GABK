@@ -51,6 +51,9 @@ export default function AccountPage() {
       });
       const result = await response.json();
       if (!response.ok || !result.success) throw new Error(result.error?.message || "Could not sign in.");
+      if (result.data.user.role !== "customer") {
+        throw new Error("Please use the separate administrator sign-in page.");
+      }
       window.sessionStorage.setItem("g-arasu-access-token", result.data.accessToken);
       setToken(result.data.accessToken);
       await loadOrders(result.data.accessToken);

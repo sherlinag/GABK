@@ -37,8 +37,11 @@ export default function StoreHeader() {
           </Link>
           <nav className={`nav-links${menuOpen ? " is-open" : ""}`} aria-label="Main navigation">
             <Link href="/menu" onClick={closeMenu}>Our menu</Link>
+            <Link href="/sweets" onClick={closeMenu}>Sweets</Link>
+            <Link href="/snacks" onClick={closeMenu}>Snacks</Link>
             <Link href="/about" onClick={closeMenu}>Our story</Link>
             <Link href="/contact" onClick={closeMenu}>Visit us</Link>
+            <Link href="/admin/login" onClick={closeMenu}>Admin sign in</Link>
           </nav>
           <div className="nav-actions">
             <button

@@ -5,6 +5,11 @@ import connectToDatabase from "@/lib/mongodb";
 import Category from "@/models/Category";
 import Product from "@/models/Product";
 
+const imageSchema = z.union([
+  z.url().max(2048),
+  z.string().regex(/^\/images\/[a-z\d/_-]+\.(?:png|jpe?g|webp|svg)$/i)
+]);
+
 const schema = z.object({
   name: z.string().trim().min(2).max(120),
   slug: z.string().trim().toLowerCase().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(140),
@@ -12,7 +17,7 @@ const schema = z.object({
   category: z.string().regex(/^[a-f\d]{24}$/i),
   pricePaise: z.number().int().positive(),
   discountPricePaise: z.number().int().positive().nullable().optional(),
-  images: z.array(z.url().max(2048)).max(8).default([]),
+  images: z.array(imageSchema).max(8).default([]),
   stock: z.number().int().min(0),
   isAvailable: z.boolean().default(true),
   isFeatured: z.boolean().default(false),

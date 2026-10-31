@@ -76,6 +76,9 @@ export default function CartPage() {
       });
       const result = await response.json();
       if (!response.ok || !result.success) throw new Error(result.error?.message || "Could not sign in.");
+      if (result.data.user.role !== "customer") {
+        throw new Error("Please use the separate administrator sign-in page.");
+      }
       window.sessionStorage.setItem("g-arasu-access-token", result.data.accessToken);
       setAccessToken(result.data.accessToken);
     } catch (requestError) {

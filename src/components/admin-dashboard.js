@@ -31,6 +31,25 @@ function isNextStatusAllowed(current, next) {
   return transitions[current]?.includes(next);
 }
 
+function OrderStatusControl({ order, onChange }) {
+  const nextStatuses = STATUSES.filter((status) => isNextStatusAllowed(order.status, status));
+  if (!nextStatuses.length) return <span className="table-muted">Complete</span>;
+
+  return (
+    <select
+      className="admin-filter"
+      aria-label={`Update status for ${order.orderNumber}`}
+      value=""
+      onChange={(event) => onChange(order, event.target.value)}
+    >
+      <option value="">Update status</option>
+      {nextStatuses.map((status) => (
+        <option key={status} value={status}>{status.replaceAll("_", " ")}</option>
+      ))}
+    </select>
+  );
+}
+
 function AdminShell({ children, section, onLogout }) {
   return (
     <div className="admin-layout">
@@ -73,6 +92,7 @@ export default function AdminDashboard() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [productSearch, setProductSearch] = useState("");
   const [productFormOpen, setProductFormOpen] = useState(false);
   const [productBusy, setProductBusy] = useState(false);
   const [editingProductId, setEditingProductId] = useState("");
@@ -174,6 +194,13 @@ export default function AdminDashboard() {
     () => filterStatus ? orders.filter((order) => order.status === filterStatus) : orders,
     [filterStatus, orders]
   );
+  const visibleProducts = useMemo(() => {
+    const query = productSearch.trim().toLowerCase();
+    if (!query) return products;
+    return products.filter((product) =>
+      `${product.name} ${product.category?.name || ""}`.toLowerCase().includes(query)
+    );
+  }, [productSearch, products]);
 
   function logout() {
     window.sessionStorage.removeItem("g-arasu-admin-token");
@@ -303,8 +330,8 @@ export default function AdminDashboard() {
           <div><div className="eyebrow">Good day, bakery team</div><h1>Dashboard overview</h1><p>Manage your products and keep orders moving.</p></div>
           <button className="button-primary" type="button" onClick={startCreateProduct}>＋ Add product</button>
         </div>
-        {error && <p className="form-error" role="alert">{error}</p>}
-        {notice && <p className="form-success" role="status">{notice}</p>}
+        {error && <p className="form-error admin-feedback" role="alert">{error}</p>}
+        {notice && <p className="form-success admin-feedback" role="status">{notice}</p>}
 
         {productFormOpen && (
           <section className="admin-panel" id="product-form">
@@ -330,7 +357,7 @@ export default function AdminDashboard() {
 
         {loading ? <div className="admin-panel">Loading store data…</div> : (
           <>
-            <section className="admin-metrics">
+            <section className="admin-metrics" aria-label="Store overview">
               <article><span>Recent orders</span><strong>{metrics.orders}</strong><small>Latest 100 orders loaded</small></article>
               <article><span>Awaiting confirmation</span><strong>{metrics.pending}</strong><small>Orders needing attention</small></article>
               <article><span>Active products</span><strong>{metrics.products}</strong><small>{metrics.demo} sample items excluded</small></article>
@@ -346,7 +373,14 @@ export default function AdminDashboard() {
                   {STATUSES.map((status) => <option key={status} value={status}>{status.replaceAll("_", " ")}</option>)}
                 </select>
               </div>
-              {visibleOrders.length === 0 ? <div className="admin-empty">No orders match this filter yet.</div> : (
+              {visibleOrders.length === 0 ? (
+                <div className="admin-empty">
+                  <span className="admin-empty-icon" aria-hidden="true">🧾</span>
+                  <strong>{filterStatus ? "No orders with this status" : "No orders yet"}</strong>
+                  <span>{filterStatus ? "Choose another status to see more orders." : "New customer orders will appear here."}</span>
+                </div>
+              ) : (
+                <>
                 <div className="admin-table-wrap">
                   <table className="admin-table">
                     <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Update</th></tr></thead>
@@ -356,26 +390,48 @@ export default function AdminDashboard() {
                         <td>{order.customer?.name || "Customer"}<small>{order.customer?.phone || order.customer?.email || ""}</small></td>
                         <td>{order.items.map((item) => `${item.name} × ${item.quantity}`).join(", ")}</td>
                         <td>{formatPrice(order.totalPaise)}<small>{order.paymentMethod.toUpperCase()} · {order.paymentStatus}</small></td>
-                        <td><span className="status-pill">{order.status.replaceAll("_", " ")}</span></td>
-                        <td>
-                          {STATUSES.filter((status) => isNextStatusAllowed(order.status, status)).length ? (
-                            <select className="admin-filter" aria-label={`Update status for ${order.orderNumber}`} value="" onChange={(event) => updateOrder(order, event.target.value)}>
-                              <option value="">Change…</option>
-                              {STATUSES.filter((status) => isNextStatusAllowed(order.status, status)).map((status) => <option key={status} value={status}>{status.replaceAll("_", " ")}</option>)}
-                            </select>
-                          ) : <span className="table-muted">Complete</span>}
-                        </td>
+                        <td><span className={`status-pill status-${order.status}`}>{order.status.replaceAll("_", " ")}</span></td>
+                        <td><OrderStatusControl order={order} onChange={updateOrder} /></td>
                       </tr>
                     ))}</tbody>
                   </table>
                 </div>
+                <div className="admin-orders-cards">
+                  {visibleOrders.map((order) => (
+                    <article className="admin-order-card" key={order._id}>
+                      <div className="admin-order-card-heading">
+                        <div><strong>{order.orderNumber}</strong><small>{dateLabel(order.createdAt)}</small></div>
+                        <span className={`status-pill status-${order.status}`}>{order.status.replaceAll("_", " ")}</span>
+                      </div>
+                      <div className="admin-order-customer">
+                        <strong>{order.customer?.name || "Customer"}</strong>
+                        <span>{order.customer?.phone || order.customer?.email || "Contact not provided"}</span>
+                      </div>
+                      <p className="admin-order-items">{order.items.map((item) => `${item.name} × ${item.quantity}`).join(", ")}</p>
+                      <div className="admin-order-card-footer">
+                        <strong>{formatPrice(order.totalPaise)}</strong>
+                        <OrderStatusControl order={order} onChange={updateOrder} />
+                      </div>
+                    </article>
+                  ))}
+                </div>
+                </>
               )}
             </section>
 
             <section className="admin-panel" id="products">
-              <div className="admin-panel-heading"><div><h2>Product catalog</h2><p>Sample entries are not available for customer checkout until verified.</p></div><span className="admin-count">{products.length} items</span></div>
+              <div className="admin-panel-heading admin-products-heading">
+                <div><h2>Product catalog</h2><p>Sample entries are not available for customer checkout until verified.</p></div>
+                <div className="admin-product-tools">
+                  <label className="admin-search-label">
+                    <span className="sr-only">Search products</span>
+                    <input className="admin-search" type="search" placeholder="Search products…" value={productSearch} onChange={(event) => setProductSearch(event.target.value)} />
+                  </label>
+                  <span className="admin-count">{visibleProducts.length} of {products.length} items</span>
+                </div>
+              </div>
               <div className="admin-product-list">
-                {products.map((product) => (
+                {visibleProducts.length ? visibleProducts.map((product) => (
                   <article className="admin-product-row" key={product._id}>
                     <div className="admin-product-thumb">{product.images?.[0] ? <img src={product.images[0]} alt="" /> : <span>🥮</span>}</div>
                     <div className="admin-product-name"><strong>{product.name}</strong><span>{product.category?.name || "Uncategorized"} {product.isDemo && <em>Sample</em>}</span></div>
@@ -386,7 +442,7 @@ export default function AdminDashboard() {
                       <button className="admin-delete-button" type="button" onClick={() => deleteProduct(product)} aria-label={`Remove ${product.name}`} title="Remove product">×</button>
                     </div>
                   </article>
-                ))}
+                )) : <div className="admin-empty">{products.length ? "No products match your search." : "No products in the catalog yet. Add your first product to get started."}</div>}
               </div>
             </section>
           </>

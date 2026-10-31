@@ -1,7 +1,6 @@
 
-# 🍰 G Arasu Bakery – Full-Stack E-Commerce Platform
+# Full-Stack E-Commerce Platform
 
-A modern, responsive and scalable bakery e-commerce platform developed for **G Arasu Bakery**, located in Muttaicadu, Kumarapuram, near Nagercoil, Tamil Nadu.
 
 The application provides a complete online shopping experience where customers can explore traditional sweets, snacks and bakery products, add items to their shopping bag, place orders and track their purchases.
 

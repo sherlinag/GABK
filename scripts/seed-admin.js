@@ -4,6 +4,9 @@ import User from "../src/models/User.js";
 
 const { MONGODB_URI, ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
 if (!MONGODB_URI) throw new Error("MONGODB_URI is required.");
+if (!process.env.AUTH_SECRET || process.env.AUTH_SECRET.length < 32) {
+  throw new Error("AUTH_SECRET must contain at least 32 characters.");
+}
 if (!ADMIN_EMAIL) throw new Error("ADMIN_EMAIL is required.");
 if (!ADMIN_PASSWORD || ADMIN_PASSWORD.length < 12) {
   throw new Error("ADMIN_PASSWORD must contain at least 12 characters.");

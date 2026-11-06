@@ -35,8 +35,6 @@ Authorized administrators can:
 - Update order statuses.
 - Review customer and order information.
 
-Both interfaces use a shared backend and MongoDB database to keep product, inventory, and order information consistent.
-
 ## Business Information
 
 | Detail | Information |

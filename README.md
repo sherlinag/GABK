@@ -6,31 +6,6 @@ Built with **Next.js, JavaScript, Tailwind CSS, MongoDB Atlas, and Mongoose**, t
 
 ---
 
-## Table of Contents
-
-- [Overview](#overview)
-- [Business Information](#business-information)
-- [Features](#features)
-- [Product Categories](#product-categories)
-- [Order Workflow](#order-workflow)
-- [Technology Stack](#technology-stack)
-- [Application Architecture](#application-architecture)
-- [Database Design](#database-design)
-- [API Overview](#api-overview)
-- [Security](#security)
-- [Performance and SEO](#performance-and-seo)
-- [Getting Started](#getting-started)
-- [Environment Configuration](#environment-configuration)
-- [Testing](#testing)
-- [Deployment](#deployment)
-- [Roadmap](#roadmap)
-- [Known Limitations](#known-limitations)
-- [Contributing](#contributing)
-- [Author](#author)
-- [License](#license)
-
----
-
 ## Overview
 
 The platform has two main interfaces:
